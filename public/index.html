@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Budget</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Budget">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#060608">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><h1>Budget</h1><p class="sub">Личный бюджет: доходы, расходы и отчёты</p></div>
+    <div class="hb"><span class="mu" style="align-self:center">Итоги в</span><select id="base"></select><button class="chip" onclick="demo()">Демо</button><button class="chip" onclick="exp_()">Экспорт</button><label class="chip">Импорт<input type="file" id="imp" accept=".json" hidden></label></div>
+  </header>
+  <nav id="tabs">
+    <button data-t="overview" class="on">Overview</button>
+    <button data-t="history">История</button>
+    <button data-t="m">Месяц</button>
+    <button data-t="q">Квартал</button>
+    <button data-t="y">Год</button>
+  </nav>
+  <form id="qa" class="qa" autocomplete="off">
+    <div class="seg2" id="kind"><button type="button" data-k="-" class="on">Расход</button><button type="button" data-k="+">Доход</button></div>
+    <input id="amt" placeholder="-20 или +1000" inputmode="decimal" required>
+    <select id="cur"></select>
+    <input id="place" placeholder="Магазин / описание" list="places">
+    <select id="cat"></select>
+    <input id="dt" type="date" required>
+    <button class="btn" id="sub">Добавить</button>
+  </form>
+  <datalist id="places"></datalist>
+  <div id="bn" class="bn" hidden>Локальный режим: сервер не подключён, данные хранятся только в этом браузере. Делайте «Экспорт» для копии.</div>
+  <main id="view"></main>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+name = "budget"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "budget"
+database_id = "ВСТАВЬТЕ-ID-БАЗЫ-BUDGET"
