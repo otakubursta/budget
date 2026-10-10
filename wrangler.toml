@@ -10,4 +10,4 @@ run_worker_first = true
 [[d1_databases]]
 binding = "DB"
 database_name = "budget"
-database_id = "ВСТАВЬТЕ-ID-БАЗЫ-BUDGET"
+database_id = "c55c06a6-990a-44fd-8889-9369e516491d"
