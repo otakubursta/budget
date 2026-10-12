@@ -33,7 +33,7 @@ const sum = a => a.reduce((s, t) => s + val(t), 0);
 const wal = c => start[c] + tx.filter(t => t.cur === c).reduce((a, t) => a + t.amount, 0);
 const totalBal = () => Object.keys(CUR).reduce((s, c) => s + conv(wal(c), c), 0);
 const inc = a => sum(a.filter(t => t.amount > 0)), exp = a => -sum(a.filter(t => t.amount < 0));
-const col = i => `hsl(${(i * 47 + 10) % 360} 65% 62%)`;
+const col = i => `hsl(240 6% ${Math.max(28, 94 - i * 9)}%)`;
 const key = (d, m) => m === 'm' ? d.slice(0, 7) : m === 'q' ? d.slice(0, 4) + ' Q' + Math.ceil(+d.slice(5, 7) / 3) : d.slice(0, 4);
 const lbl = (k, m) => m === 'm' ? new Date(k + '-01').toLocaleString('ru', { month: 'long', year: 'numeric' }) : k;
 const ymOf = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
@@ -141,7 +141,7 @@ const recent = n => [...tx].sort((a, b) => b.date.localeCompare(a.date) || b.id 
 function overview() {
   const b = totalBal(), cm = tx.filter(t => t.date.startsWith(ymOf(new Date()))), mname = new Date().toLocaleString('ru', { month: 'long' });
   const k = (l, v, s, c = '') => `<div class="kpi"><small>${l}</small><b class="${c}">${v}</b><div class="sub">${s}</div></div>`;
-  return `<div class="kpis">${k('Баланс', money(b), Object.keys(CUR).map(c => money(wal(c), 0, c)).join(' · ') + ' · <button class="link" onclick="setStart()">стартовые</button>', cls(b))}${k('Доходы · ' + mname, money(inc(cm), 1), cm.filter(t => t.amount > 0).length + ' операций', 'pos')}${k('Расходы · ' + mname, money(-exp(cm), 1), cm.filter(t => t.amount < 0).length + ' операций', 'neg')}</div>
+  return `<div class="kpis">${k('Баланс', money(b), Object.keys(CUR).map(c => money(wal(c), 0, c)).join(' · ') + ' · <button class="link" onclick="setStart()">стартовые</button>')}${k('Доходы · ' + mname, money(inc(cm), 1), cm.filter(t => t.amount > 0).length + ' операций', 'pos')}${k('Расходы · ' + mname, money(-exp(cm), 1), cm.filter(t => t.amount < 0).length + ' операций', 'neg')}</div>
   ${notesHTML()}<div class="card"><div class="top"><h3>Динамика баланса</h3><span>${tx.length} операций</span></div><div id="bal"></div></div>
   <div class="two"><div class="card"><h3>Расходы · ${mname}</h3>${donut(byCat(cm))}</div>
   <div class="card"><h3>Последние операции</h3>${tx.length ? `<div class="tw" style="border:0;margin:0"><table>${recent(8).map(t => row(t, 1)).join('')}</table></div>` : '<div class="mu empty">Пока пусто</div>'}</div></div>`;
