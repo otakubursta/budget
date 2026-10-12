@@ -14,8 +14,8 @@ async function sign(msg, key) {
   return hex(await crypto.subtle.sign('HMAC', k, enc.encode(msg)));
 }
 const page = err => new Response(`<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${APP}</title><link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="${APP}"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#060608">
-<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#060608;color:#f4f4f7;font:16px Inter,system-ui,sans-serif}
-form{width:min(340px,88vw);background:#0b0b0f;border:1px solid #1a1a20;border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:14px}
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(520px 360px at 50% -60px,rgba(255,255,255,.16),transparent 70%),#000;color:#f4f4f7;font:16px Inter,system-ui,sans-serif}
+form{width:min(340px,88vw);background:linear-gradient(135deg,rgba(255,255,255,.11),rgba(255,255,255,.035));backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,.15);box-shadow:inset 0 1px 0 rgba(255,255,255,.32),0 24px 50px rgba(0,0,0,.55);border-radius:26px;padding:28px;display:flex;flex-direction:column;gap:14px}
 h1{margin:0 0 4px;font-size:20px}input{background:#0f0f14;color:#f4f4f7;border:1px solid #1a1a20;border-radius:12px;padding:13px;font:inherit}
 button{background:linear-gradient(#b9c1d2,#9aa3b8);border:0;border-radius:12px;padding:13px;font:600 16px Inter,system-ui;color:#0a0a0c}.e{color:#ff6b6b;font-size:14px}</style></head>
 <body><form method="POST" action="/login"><h1>${APP}</h1>
