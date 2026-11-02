@@ -167,10 +167,190 @@ function review(m) {
   ${[...ks].reverse().map(k => `<tr class="clk ${k === cur ? 'cur' : ''}" onclick="sel['${m}']='${k}';render()"><td style="text-transform:capitalize">${lbl(k, m)}<td class="r mono pos">${money(inc(g[k]))}<td class="r mono neg">${money(exp(g[k]))}<td class="r mono ${cls(sum(g[k]))}">${money(sum(g[k]), 1)}`).join('')}</tbody></table></div>`;
 }
 
+function allTime() {
+  const all = [...tx].sort((a, b) => a.date.localeCompare(b.date));
+
+  // Общая статистика за весь период
+  const income = inc(all);
+  const expenses = exp(all);
+  const balance = sum(all);
+
+  // Группировка операций по месяцам
+  const months = {};
+
+  all.forEach(t => {
+    const month = t.date.slice(0, 7);
+
+    if (!months[month]) {
+      months[month] = [];
+    }
+
+    months[month].push(t);
+  });
+
+  const keys = Object.keys(months).sort().reverse();
+  const countMonths = keys.length;
+
+  const averageExpenses = countMonths
+    ? expenses / countMonths
+    : 0;
+
+  const averageIncome = countMonths
+    ? income / countMonths
+    : 0;
+
+  const kpi = (title, value, subtitle, color = '') => `
+    <div class="kpi">
+      <small>${title}</small>
+      <b class="${color}">${value}</b>
+      <div class="sub">${subtitle}</div>
+    </div>
+  `;
+
+  // Таблица по месяцам
+  const rows = keys.map(month => {
+    const operations = months[month];
+
+    const monthIncome = inc(operations);
+    const monthExpenses = exp(operations);
+    const monthBalance = sum(operations);
+
+    return `
+      <tr>
+        <td style="text-transform:capitalize">
+          ${lbl(month, 'm')}
+        </td>
+
+        <td class="r mono pos">
+          ${money(monthIncome)}
+        </td>
+
+        <td class="r mono neg">
+          ${money(monthExpenses)}
+        </td>
+
+        <td class="r mono ${cls(monthBalance)}">
+          ${money(monthBalance, 1)}
+        </td>
+
+        <td class="r">
+          ${operations.length}
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  return `
+    <div class="kpis">
+
+      ${kpi(
+        'Все доходы',
+        money(income),
+        'За всё время',
+        'pos'
+      )}
+
+      ${kpi(
+        'Все расходы',
+        money(expenses),
+        'За всё время',
+        'neg'
+      )}
+
+      ${kpi(
+        'Разница',
+        money(balance, 1),
+        'Доходы минус расходы',
+        cls(balance)
+      )}
+
+    </div>
+
+    <div class="two">
+
+      <div class="card">
+        <h3>Расходы за всё время</h3>
+        ${donut(byCat(all))}
+      </div>
+
+      <div class="card">
+        <h3>Общая информация</h3>
+
+        <div class="pair">
+
+          <div class="kpi sm">
+            <small>Количество операций</small>
+            <b>${all.length}</b>
+          </div>
+
+          <div class="kpi sm">
+            <small>Месяцев с операциями</small>
+            <b>${countMonths}</b>
+          </div>
+
+          <div class="kpi sm">
+            <small>Средние расходы в месяц</small>
+            <b>${money(averageExpenses)}</b>
+          </div>
+
+          <div class="kpi sm">
+            <small>Средний доход в месяц</small>
+            <b class="pos">${money(averageIncome)}</b>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <h3>Доходы и расходы по месяцам</h3>
+        <span>${countMonths} мес.</span>
+      </div>
+
+      ${
+        keys.length
+          ? bars(
+              keys.slice().reverse().map(month => ({
+                lb: month.slice(5) + '.' + month.slice(2, 4),
+                i: inc(months[month]),
+                e: exp(months[month])
+              }))
+            )
+          : '<div class="mu empty">Пока нет операций</div>'
+      }
+    </div>
+
+    <h4>История всех месяцев</h4>
+
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>Месяц</th>
+            <th class="r">Доходы</th>
+            <th class="r">Расходы</th>
+            <th class="r">Итого</th>
+            <th class="r">Операции</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${
+            rows ||
+            '<tr><td colspan="5" class="mu">Пока нет операций</td></tr>'
+          }
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
 function render() {
   $('#place').nextElementSibling;
   $('#places').innerHTML = [...new Set(tx.map(t => t.place).filter(Boolean))].map(p => `<option value="${esc(p)}">`).join('');
-  $('#view').innerHTML = tab === 'overview' ? overview() : tab === 'history' ? history() : review(tab);
+  $('#view').innerHTML = tab === 'overview' ? overview() : tab === 'history' ? history() : tab === 'all' ? allTime() : review(tab);
   if (tab === 'overview') { $('#view').insertAdjacentHTML('beforeend', ratesLine()); drawBal(true); }
 }
 $('#tabs').onclick = e => {
