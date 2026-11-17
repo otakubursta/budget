@@ -14,13 +14,13 @@
 <meta name="theme-color" content="#060608">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
 <div class="wrap">
   <header>
     <div><div class="brand"><span class="mark"><svg viewBox="0 0 200 200" width="18" height="18"><g fill="none" stroke-width="30" transform="rotate(-90 100 100)"><circle r="68" cx="100" cy="100" stroke="#f4f4f7" stroke-dasharray="190 430"/><circle r="68" cx="100" cy="100" stroke="#a9a9b6" stroke-dasharray="120 500" stroke-dashoffset="-198"/><circle r="68" cx="100" cy="100" stroke="#6d6d7a" stroke-dasharray="90 530" stroke-dashoffset="-326"/></g></svg></span><h1>Budget</h1></div><p class="sub">Личный бюджет: доходы, расходы и отчёты</p></div>
-    <div class="hb"><span class="mu" style="align-self:center">Итоги в</span><select id="base"></select><button class="chip" onclick="demo()">Демо</button><button class="chip" onclick="exp_()">Экспорт</button><label class="chip">Импорт<input type="file" id="imp" accept=".json" hidden></label></div>
+    <div class="hb"><span class="mu" style="align-self:center">Итоги в</span><select id="base"></select><button class="chip" id="demoBtn" onclick="demo()">Демо</button><button class="chip" onclick="exp_()" title="Полная копия данных (JSON)">Экспорт</button><button class="chip" onclick="expCSV()" title="Таблица для Excel / Numbers">CSV</button><label class="chip">Импорт<input type="file" id="imp" accept=".json,application/json" hidden></label></div>
   </header>
   <nav id="tabs">
     <button data-t="overview" class="on">Overview</button>
@@ -29,20 +29,31 @@
     <button data-t="q">Квартал</button>
     <button data-t="y">Год</button>
     <button data-t="all">Всё время</button>
+    <button data-t="plan">Планы</button>
   </nav>
-  <form id="qa" class="qa" autocomplete="off">
-    <div class="seg2" id="kind"><button type="button" data-k="-" class="on">Расход</button><button type="button" data-k="+">Доход</button></div>
-    <input id="amt" placeholder="-20 или +1000" inputmode="decimal" required>
-    <select id="cur"></select>
-    <input id="place" placeholder="Магазин / описание" list="places">
-    <select id="cat"></select>
-    <input id="dt" type="date" required>
-    <button class="btn" id="sub">Добавить</button>
+  <form id="qa" class="qa" autocomplete="off" novalidate>
+    <div class="eb" id="eb" hidden><span>✎ Редактирование операции</span><button type="button" class="chip sm" id="ecancel">Отменить <span class="mu kb">Esc</span></button></div>
+    <div class="qr">
+      <div class="seg2" id="kind"><button type="button" data-k="-" class="on">Расход</button><button type="button" data-k="+">Доход</button><button type="button" data-k="t">Перевод</button></div>
+      <input id="amt" placeholder="-12.5 кофе chf" inputmode="decimal" enterkeyhint="done" aria-label="Сумма">
+      <select id="cur" aria-label="Валюта"></select>
+      <div class="slot">
+        <input id="place" placeholder="Описание" list="places" enterkeyhint="done" aria-label="Описание">
+        <div class="trg" id="trg" hidden><span class="arr">→</span><input id="amt2" placeholder="Получено" inputmode="decimal" enterkeyhint="done" aria-label="Получено"><select id="cur2" aria-label="Валюта получения"></select></div>
+      </div>
+      <div class="dq"><input id="dt" type="date" aria-label="Дата"><button type="button" class="dqb" data-d="0">Сегодня</button><button type="button" class="dqb" data-d="1">Вчера</button></div>
+      <button class="btn" id="sub">Добавить</button>
+    </div>
+    <div class="cc" id="cats"></div>
+    <div class="qx"><input id="note" placeholder="Комментарий (необязательно)" maxlength="300" enterkeyhint="done"><span id="hint" class="mu hint"></span><button type="button" class="link" id="mkTpl" title="Сохранить текущую операцию как шаблон">☆ В шаблоны</button></div>
+    <div class="tpls" id="tpls"></div>
   </form>
   <datalist id="places"></datalist>
   <div id="bn" class="bn" hidden>Локальный режим: сервер не подключён, данные хранятся только в этом браузере. Делайте «Экспорт» для копии.</div>
+  <div id="dm" class="bn dmb" hidden>Демо-режим: показаны примерные данные, ничего не сохраняется ни в браузере, ни на сервере. <button class="link" onclick="location.reload()">Выйти из демо</button></div>
   <main id="view"></main>
 </div>
-<script src="script.js"></script>
+<div id="toasts" class="toasts" aria-live="polite"></div>
+<script src="script.js?v=2"></script>
 </body>
 </html>
