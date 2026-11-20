@@ -319,9 +319,26 @@ function renderTpl() {
 
 /* ---------- старт / курсы ---------- */
 function setStart() {
-  const v = prompt('Стартовые суммы: USD EUR CHF (через пробел)', `${start.USD} ${start.EUR} ${start.CHF}`); if (v === null) return;
-  const n = v.trim().split(/\s+/).map(x => (x.trim()[0] === '-' ? -1 : 1) * parseAmt(x));
-  if (n.length === 3 && n.every(x => !isNaN(x))) { start = { USD: n[0], EUR: n[1], CHF: n[2] }; save(); render(); } else toast('Введите три числа: USD EUR CHF', { err: 1 });
+  const sym = { USD: '$', EUR: '€', CHF: 'CHF' };
+  const f = c => `<label style="display:flex;align-items:center;gap:10px"><span class="mu" style="width:42px">${sym[c] || c}</span><input id="sb_${c}" inputmode="decimal" autocomplete="off" value="${(Math.round(wal(c) * 100) / 100).toString()}" style="flex:1;padding:12px;border-radius:12px;color:var(--tx);font:inherit"></label>`;
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.6);display:grid;place-items:center;padding:16px';
+  ov.innerHTML = `<form class="card" style="width:min(380px,100%);margin:0;display:flex;flex-direction:column;gap:12px"><h3 style="margin:0">Сколько у вас сейчас</h3><div class="mu" style="font-size:13px">Впишите реальный остаток по каждой валюте. Операции не изменятся, пересчитается только стартовая сумма.</div>${CURS.map(f).join('')}<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px"><button type="button" class="chip" data-x>Отмена</button><button class="btn">Сохранить</button></div></form>`;
+  const close = () => ov.remove();
+  ov.onclick = e => { if (e.target === ov || e.target.hasAttribute('data-x')) close(); };
+  ov.querySelector('form').onsubmit = e => {
+    e.preventDefault();
+    const ns = { ...start };
+    for (const c of CURS) {
+      const raw = ov.querySelector('#sb_' + c).value.trim();
+      const v = raw === '' ? 0 : (raw[0] === '-' ? -1 : 1) * parseAmt(raw);
+      if (!Number.isFinite(v)) return toast('Не удалось прочитать сумму ' + c, { err: 1 });
+      ns[c] = +(start[c] + (v - wal(c))).toFixed(2);
+    }
+    start = ns; save(); render(); close(); toast('Баланс обновлён');
+  };
+  document.body.appendChild(ov);
+  ov.querySelector('input').focus();
 }
 async function fetchRates(manual) {
   try {
@@ -443,7 +460,7 @@ function overview() {
   const now = new Date(), cm = ops(tx.filter(t => t.date.startsWith(ymOf(now)))), mname = now.toLocaleString('ru', { month: 'long' }), b = totalBal(), f = forecast();
   const k = (l, v, s, c = '') => `<div class="kpi"><small>${l}</small><b class="${c}">${v}</b><div class="sub">${s}</div></div>`;
   const kp = (l, v, c = '', s = '') => `<div class="kpi sm"><small>${l}</small><b class="${c}">${v}</b>${s ? `<div class="sub">${s}</div>` : ''}</div>`;
-  return `<div class="kpis">${k('Баланс', money(b), CURS.map(c => money(wal(c), 0, c)).join(' · ') + ' · <button class="link" onclick="setStart()">стартовые</button>')}${k('Доходы · ' + mname, money(inc(cm), 1), cm.filter(t => t.amount > 0).length + ' операций', 'pos')}${k('Расходы · ' + mname, money(-exp(cm), 1), cm.filter(t => t.amount < 0).length + ' операций', 'neg')}</div>
+  return `<div class="kpis">${k('Баланс', money(b), CURS.map(c => money(wal(c), 0, c)).join(' · ') + ' · <button class="link" onclick="setStart()">изменить баланс</button>')}${k('Доходы · ' + mname, money(inc(cm), 1), cm.filter(t => t.amount > 0).length + ' операций', 'pos')}${k('Расходы · ' + mname, money(-exp(cm), 1), cm.filter(t => t.amount < 0).length + ' операций', 'neg')}</div>
   <div class="two"><div class="card"><div class="top"><h3>Прогноз · ${mname}</h3><span>день ${f.d} из ${f.D}</span></div><div class="pair">
     ${kp('Расходы к концу месяца', money(-f.projExp), 'neg', `сейчас ${money(f.spent)}${f.upExp ? ` · ещё регулярные ${money(f.upExp)}` : ''}`)}
     ${kp('Темп трат в день', money(f.pace), '', 'без регулярных и ежемесячных платежей')}
@@ -700,4 +717,3 @@ async function init() {
   if (!rates.man && (!rates.ts || Date.now() - rates.ts > 432e5)) fetchRates(false);
 }
 init();
-
